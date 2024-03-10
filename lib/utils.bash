@@ -41,12 +41,28 @@ download_release() {
 	version="$1"
 	filename="$2"
 
-	# TODO: Adapt the release URL convention for weed
-	url="$GH_REPO/archive/v${version}.tar.gz"
+	url="$GH_REPO/releases/download/${version}/$(get_uname_info).tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
+	echo "from $url"
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
 }
+
+get_uname_machine() {
+  uname -m | tr A-Z a-z | tr -dc 'a-z0-9_' | sed -e '
+    s/x86_64/amd64/
+    s/aarch64/arm64/
+  '
+}
+
+get_uname_kernel() {
+	uname -s | tr A-Z a-z | tr -dc 'a-z0-9'
+}
+
+get_uname_info() {
+	echo -n "$(get_uname_kernel)_$(get_uname_machine)"
+}
+
 
 install_version() {
 	local install_type="$1"
